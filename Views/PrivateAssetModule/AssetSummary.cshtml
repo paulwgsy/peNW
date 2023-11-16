@@ -1,0 +1,41 @@
+﻿@model Asset
+@{
+    ViewBag.Title = "Asset Summary";
+}
+
+<div class="asset-summary">
+    <h1>Asset Summary</h1>
+
+    <div>
+        <strong>Asset ID:</strong> @Model.AssetID
+    </div>
+    <div>
+        <strong>Fund Name:</strong> @Model.FundName
+    </div>
+    <div>
+        <strong>Currency:</strong> @Model.Currency
+    </div>
+    <div>
+        <strong>Fund Strategy:</strong> @Model.Strategy
+    </div>
+    <div>
+        <strong>Fund Asset Class:</strong> @Model.AssetClass
+    </div>
+    <div>
+        <strong>Manager ID:</strong> @Model.ManagerID
+    </div>
+</div>
+
+<style>
+    .asset-summary {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #e1e1e1;
+        border-radius: 5px;
+    }
+
+        .asset-summary div {
+            margin-bottom: 10px;
+        }
+</style>

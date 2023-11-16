@@ -1,0 +1,97 @@
+﻿@model Asset
+@using NoahWeb_Private_Asset_Module.enums
+
+<h2>Edit Asset</h2>
+
+<form asp-controller="PrivateAssetModule" asp-action="EditAsset" method="post">
+    <!-- Hidden field for AssetID -->
+    <input type="hidden" name="AssetID" value="@Model.AssetID" />
+
+    <div>
+        <label for="Type">Asset Type:</label>
+        <select name="Type">
+            @foreach (AssetType type in Enum.GetValues(typeof(AssetType)))
+            {
+                if (Model.Type == type)
+                {
+                    <option value="@type" selected="selected">@type</option>
+                }
+                else
+                {
+                    <option value="@type">@type</option>
+                }
+            }
+
+        </select>
+    </div>
+    <div>
+        <label for="FundName">Fund Name:</label>
+        <input type="text" name="FundName" required value="@Model.FundName" />
+    </div>
+    <div>
+        <label for="Currency">Currency:</label>
+        <input type="text" name="Currency" required value="@Model.Currency" />
+    </div>
+    <div>
+        <label for="Strategy">Fund Strategy:</label>
+        <select name="Strategy">
+            @foreach (FundStrategy strategy in Enum.GetValues(typeof(FundStrategy)))
+            {
+                if (Model.Strategy == strategy)
+                {
+                    <option value="@strategy" selected="selected">@strategy</option>
+                }
+                else
+                {
+                    <option value="@strategy">@strategy</option>
+                }
+            }
+
+        </select>
+    </div>
+    <div>
+        <label for="AssetClass">Fund Asset Class:</label>
+        <select name="AssetClass">
+            @foreach (FundAssetClass assetClass in Enum.GetValues(typeof(FundStrategy)))
+            {
+                if (Model.AssetClass == assetClass)
+                {
+                    <option value="@assetClass" selected="selected">@assetClass</option>
+                }
+                else
+                {
+                    <option value="@assetClass">@assetClass</option>
+                }
+            }
+        </select>
+    </div>
+    <div>
+        <label for="ManagerID">Manager:</label>
+        <input type="number" name="ManagerID" required value="@Model.ManagerID" />
+        <!-- Ideally, you'd use a dropdown populated with manager names and their IDs -->
+    </div>
+    <div>
+        <label for="Vintage">Vintage (Year):</label>
+        <input type="number" name="Vintage" required value="@Model.Vintage" min="1900" max="@DateTime.Now.Year" />
+    </div>
+    <div>
+        <label for="AssociatedFundID">Associated Fund:</label>
+        <select name="AssociatedFundID">
+            <option value="">--Select a Fund--</option>
+            @foreach (var fund in ViewBag.Assets)
+            {
+                if (Model.AssociatedFundID == fund.AssetID)
+                {
+                    <option value="@fund.AssetID" selected="selected">@fund.FundName</option>
+                }
+                else
+                {
+                    <option value="@fund.AssetID">@fund.FundName</option>
+                }
+            }
+        </select>
+    </div>
+    <div>
+        <input type="submit" value="Update Asset" />
+    </div>
+</form>

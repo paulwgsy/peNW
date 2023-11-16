@@ -1,0 +1,51 @@
+﻿@model Transaction
+@using NoahWeb_Private_Asset_Module.enums  // replace YourNamespace with the actual namespace
+
+<form asp-action="AddTransaction" method="post">
+    <div>
+        <label for="AssetID">Asset:</label>
+        <select asp-for="AssetID">
+            @foreach (var asset in ViewBag.Assets) // We will populate this from the controller
+            {
+                <option value="@asset.AssetID">@asset.FundName</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="Value">Value:</label>
+        <input asp-for="Value" required />
+    </div>
+    <div>
+        <label for="Date">Date:</label>
+        <input asp-for="Date" type="date" required />
+    </div>
+    <div>
+        <label for="Currency">Currency:</label>
+        <input asp-for="Currency" required />
+    </div>
+    <div>
+        <label for="Recallable">Recallable:</label>
+        <input asp-for="Recallable" type="checkbox" />
+    </div>
+    <div>
+        <label for="Type">Transaction Type:</label>
+        <select asp-for="Type">
+            @foreach (TransactionType type in Enum.GetValues(typeof(TransactionType)))
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="Calculation">Calculation:</label>
+        <select asp-for="Calculation">
+            @foreach (CalculationType calc in Enum.GetValues(typeof(CalculationType)))
+            {
+                <option value="@calc">@calc</option>
+            }
+        </select>
+    </div>
+    <div>
+        <input type="submit" value="Add Transaction" />
+    </div>
+</form>

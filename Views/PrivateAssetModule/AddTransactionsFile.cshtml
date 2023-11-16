@@ -1,0 +1,295 @@
+﻿
+@using NoahWeb_Private_Asset_Module.enums  // replace YourNamespace with the actual namespace
+
+<form method="post" action="@Url.Action("MapAndSaveData", "PrivateAssetModule")" enctype="multipart/form-data">
+    <label for="AssetSelection">Select Asset:</label>
+    <select id="AssetSelection" name="AssetID">
+        @if (ViewBag.Assets != null && ((List<Asset>)ViewBag.Assets).Any())
+        {
+            foreach (var asset in ViewBag.Assets)
+            {
+                <option value="@asset.AssetID">@asset.FundName</option>
+            }
+        }
+        else
+        {
+            <option disabled>No assets available</option>
+        }
+
+    </select>
+
+    @if (TempData["ErrorMessages"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessages"]
+        </div>
+    }
+
+    <div id="dropZone">
+        Drag & Drop your CSV file here
+    </div>
+
+
+    <input type="file" name="file" id="fileInput" style="display: none;" />
+    <!-- To display the file preview and mapping dropdowns -->
+
+    <div id="csvPreviewContainer" style="overflow-x: auto; max-height: 400px;">
+        <!-- The table will be dynamically inserted here by the JavaScript function -->
+    </div>
+    <input type="submit" value="Save Data" />
+</form>
+
+    <script>let formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('assetId', document.getElementById('AssetSelection').value);
+
+        let dropZone = document.getElementById('dropZone');
+        let selectedFile = null; // A place to store the file in memory
+
+        dropZone.ondragover = function () {
+            this.className = 'hover';
+            return false;
+        };
+
+        dropZone.ondragleave = function () {
+            this.className = '';
+            return false;
+        };
+
+        dropZone.ondrop = function (event) {
+            event.preventDefault();
+            this.className = '';
+
+            selectedFile = event.dataTransfer.files[0];
+            let fileInput = document.getElementById('fileInput');
+            fileInput.files = event.dataTransfer.files;
+            uploadFile(selectedFile);
+        };
+
+        function uploadFile(file) {
+            let formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/PrivateAssetModule/UploadCsv', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // If response status is not OK, handle it as an error
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || 'Unknown error occurred');
+                        });
+                    }
+                    return response.json();
+                })
+
+                .then(data => {
+                    displayCsvPreview(data);
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    displayError(error.message);
+                });
+        }
+
+        function displayError(errorMessage) {
+            let container = document.getElementById('csvPreviewContainer');
+            container.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`; // Display error in a styled div
+        }
+
+
+
+        function displayCsvPreview(data) {
+            // Add the asset ID
+            let assetId = document.getElementById('AssetSelection').value;
+
+            let table = document.createElement('table');
+            table.classList.add('table');  // Bootstrap class for basic table styling
+
+            // Assuming the first row of CSV is the header
+            let thead = document.createElement('thead');
+            let headerRow = document.createElement('tr');
+
+            // Add an "Asset ID" column header
+            let assetHeader = document.createElement('th');
+            assetHeader.textContent = "Asset ID";
+            headerRow.appendChild(assetHeader);
+
+            for (let key in data[0]) {
+                let th = document.createElement('th');
+
+                // Create a container div for header text and select dropdown
+                let containerDiv = document.createElement('div');
+
+                // Create a span for the header text
+                let headerTextSpan = document.createElement('span');
+                headerTextSpan.textContent = key;
+                containerDiv.appendChild(headerTextSpan);
+
+                let select = document.createElement('select');
+                select.name = `mappings[${key}]`;
+                select.innerHTML = `
+        <option value="">Map to...</option>
+        <option value="Value">Value</option>
+        <option value="Date">Date</option>
+        <option value="Currency">Currency</option>
+        <option value="Type">Type</option>
+        <option value="Calculation">Calculation</option>
+        <option value="Recallable">Recallable</option>
+        <option value="Discard">Discard</option>
+    `;
+
+                // Append select dropdown to the container
+                containerDiv.appendChild(select);
+
+                // Append the container div to th
+                th.appendChild(containerDiv);
+
+                // Finally, append the th to the header row
+                headerRow.appendChild(th);
+            }
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            let tbody = document.createElement('tbody');
+
+            // Loop through the data to populate the table
+            data.forEach(row => {
+                let tr = document.createElement('tr');
+
+                // Add the assetId to each row
+                let assetData = document.createElement('td');
+                assetData.textContent = assetId;
+                tr.appendChild(assetData);
+
+                for (let key in row) {
+                    let td = document.createElement('td');
+                    td.textContent = row[key];
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+
+            // Append table to a container div
+            let container = document.getElementById('csvPreviewContainer');
+            container.innerHTML = '';  // Clear previous data
+            container.appendChild(table);
+
+            let dataTypeMapping = analyzeDataTypes(data);
+            updateColumnSelectors(dataTypeMapping);
+            updateDropdowns(); 
+        }
+
+        function detectDataType(columnValues) {
+            let isDate = columnValues.every(value => !isNaN(Date.parse(value)) && value.trim() !== '');
+            let isDecimal = columnValues.every(value => !isNaN(parseFloat(value)) && value.toString().indexOf('.') !== -1);
+            let isInteger = columnValues.every(value => !isNaN(parseInt(value)) && parseFloat(value) === parseInt(value));
+
+            let detectedType = 'String'; // Default type
+            if (isDate) detectedType = 'Date';
+            else if (isDecimal) detectedType = 'Decimal';
+            else if (isInteger) detectedType = 'Integer';
+
+            console.log(`Detected Type for column: ${detectedType}`);
+            return detectedType;
+        }
+
+
+        function analyzeDataTypes(data) {
+            let dataTypeMapping = {};
+            if (data.length < 2) return dataTypeMapping; // Check if there's only header row
+
+            for (let key in data[0]) {
+                // Start from the second row (index 1) to skip the header
+                let columnValues = data.slice(1).map(row => row[key]);
+                dataTypeMapping[key] = detectDataType(columnValues);
+            }
+
+            console.log('Data Type Mapping:', dataTypeMapping);
+            return dataTypeMapping;
+        }
+
+
+        document.getElementById('AssetSelection').addEventListener('change', function () {
+            if (selectedFile) {
+                uploadFile(selectedFile);
+            }
+        });
+
+        function updateColumnSelectors(dataTypeMapping) {
+            let dropdowns = document.querySelectorAll('#csvPreviewContainer select');
+            let enabledDropdowns = [];
+
+            dropdowns.forEach(dropdown => {
+                let columnName = dropdown.name.match(/\[(.*?)\]/)[1]; // Extract column name from the name attribute
+                let dataType = dataTypeMapping[columnName];
+                Array.from(dropdown.options).forEach(option => {
+                    if (dataType) {
+                        if (dataType === option.value || option.value === "") {
+                            option.disabled = false;
+                            enabledDropdowns.push(dropdown.name);
+                        } else {
+                            option.disabled = true;
+                        }
+                    }
+                });
+            });
+
+            console.log('Enabled Dropdowns:', enabledDropdowns);
+            // Call updateDropdowns with the names of dropdowns that should be enabled
+            updateDropdowns(enabledDropdowns);
+        }
+
+
+        function updateDropdowns(enabledDropdowns) {
+            let dropdowns = document.querySelectorAll('#csvPreviewContainer select');
+
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('change', () => {
+                    // Collect all currently selected values
+                    let selectedValues = [];
+                    dropdowns.forEach(d => {
+                        if (d.value) {
+                            selectedValues.push(d.value);
+                        }
+                    });
+
+                    // For each dropdown, disable options that are in `selectedValues`
+                    dropdowns.forEach(d => {
+                        let currentSelection = d.value;
+                        Array.from(d.options).forEach(option => {
+                            if (option.value !== currentSelection && selectedValues.includes(option.value)) {
+                                option.disabled = true;
+                            } else if (!enabledDropdowns || enabledDropdowns.includes(d.name)) {
+                                // Enable option if it's not in selectedValues or if it's specifically enabled
+                                option.disabled = false;
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+
+
+
+
+    </script>
+<style>
+    #dropZone {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed #ccc;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .hover {
+        background-color: #e0e0e0; /* Light gray background */
+    }
+
+</style>

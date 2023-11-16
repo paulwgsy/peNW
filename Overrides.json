@@ -1,0 +1,23 @@
+[
+  {
+    "Id": 1,
+    "InstrumentId": 1,
+    "Descriptor": "Currency",
+    "Value": "GBP",
+    "EffectiveDate": "2022-01-01"
+  },
+  {
+    "Id": 2,
+    "InstrumentId": 2,
+    "Descriptor": "Liquidity",
+    "Value": "5 days",
+    "EffectiveDate": "2022-01-01"
+  },
+  {
+    "Id": 3,
+    "InstrumentId": 3,
+    "Descriptor": "Region",
+    "Value": "North America",
+    "EffectiveDate": "2022-01-01"
+  }
+]

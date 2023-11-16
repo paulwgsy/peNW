@@ -1,0 +1,60 @@
+﻿@model List<AssetView>
+@{
+    ViewData["Title"] = "Private Asset Data";
+}
+
+<div class="asset-viewsummary">
+    <h1>Asset View Summary</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Asset ID</th>
+                <th>Specified Date</th>
+                <th>Contribution Total</th>
+                <th>Distribution Total</th>
+                <th>Net Cash Flow</th>
+                <th>Carry Value</th>
+                <th>DPI</th>
+                <th>RVPI</th>
+                <th>TVPI</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.AssetID</td>
+                    <td>@item.SpecifiedDate.ToString("MMM-yyyy")</td>
+                    <td>@string.Format("{0:N2}", item.ContributionTotal)</td>
+                    <td>@string.Format("{0:N2}", item.DistributionTotal)</td>
+                    <td>@string.Format("{0:N2}", item.NetCashFlowTotal)</td>
+                    <td>@string.Format("{0:N2}", item.CarryValue)</td>
+                    <td>@string.Format("{0:F2}", item.DPI)</td>
+                    <td>@string.Format("{0:F2}", item.RVPI)</td>
+                    <td>@string.Format("{0:F2}", item.TVPI)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse; /* This will ensure that there are no spaces between the borders of adjacent cells */
+        margin-top: 20px;
+    }
+
+        .table, .table th, .table td {
+            border: 1px solid #d1d1d1; /* This gives a border to the table and the cells */
+            padding: 10px; /* This ensures there's spacing within each cell */
+        }
+
+            .table th {
+                background-color: #f4f4f4; /* A subtle background for headers to distinguish them */
+                text-align: left;
+            }
+
+            .table tbody tr:hover {
+                background-color: #f9f9f9; /* A subtle hover effect for rows */
+            }
+</style>

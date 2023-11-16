@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Private Asset Module</title>
+</head>
+<body>
+    <div class="container">
+        <h1>There was an error in your Transaction File</h1>
+        @if (TempData["ErrorMessages"] != null)
+        {
+            <div class="alert alert-danger">
+                @Html.Raw(TempData["ErrorMessages"].ToString())
+            </div>
+        }
+        <div class="actions">
+            <a href="AddTransactionsFile" class="btn btn-primary">Bulk Add Transactions</a>
+        </div>
+    </div>
+
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        .btn {
+            margin: 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</body>
+</html>

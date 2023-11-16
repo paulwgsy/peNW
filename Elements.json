@@ -1,0 +1,35 @@
+[
+  {
+    "Id": 1,
+    "Name": "US Equity",
+    "Currency": "USD",
+    "Region": "North America",
+    "AssetClass": "Equity",
+    "Liquidity": "1 day",
+    "Maturity": "N/A",
+    "Strategy": "Long Only",
+    "Sector": "Technology"
+  },
+  {
+    "EId": 2,
+    "Name": "UK Government Bonds",
+    "Currency": "GBP",
+    "Region": "Europe",
+    "AssetClass": "Bonds",
+    "Liquidity": "2 days",
+    "Maturity": "10 years",
+    "Strategy": "Long Only",
+    "Sector": "Government"
+  },
+  {
+    "Id": 3,
+    "Name": "Gold",
+    "Currency": "USD",
+    "Region": "Global",
+    "AssetClass": "Commodities",
+    "Liquidity": "N/A",
+    "Maturity": "N/A",
+    "Strategy": "N/A",
+    "Sector": "Materials"
+  }
+]

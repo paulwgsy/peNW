@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Asset>
+
+<h2>Assets Overview</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Asset Type</th>
+            <th>Fund Name</th>
+            <th>Currency</th>
+            <th>Strategy</th>
+            <th>Asset Class</th>
+            <th>Manager ID</th>
+            <th>Vintage</th>
+            <th>Associated Fund ID</th>
+            <th>Actions</th> <!-- or edit/delete actions in future -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model)
+        {
+            <tr>
+                <td>@asset.AssetID</td>
+                <td>@asset.Type</td>
+                <td>@asset.FundName</td>
+                <td>@asset.Currency</td>
+                <td>@asset.Strategy</td>
+                <td>@asset.AssetClass</td>
+                <td>@asset.ManagerID</td>
+                <td>@asset.Vintage</td>
+                <td>@asset.AssociatedFundID</td>
+                <td>
+                    <!-- Links to edit or delete the asset -->
+                     <a href="@Url.Action("EditAsset", new { id = asset.AssetID })">Edit</a> |
+                     <button class="delete-btn" data-asset-id="@asset.AssetID">Delete</button> 
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var deleteButtons = document.querySelectorAll(".delete-btn");
+        deleteButtons.forEach(function(button) {
+            button.addEventListener("click", function(e) {
+                var assetId = e.target.getAttribute("data-asset-id");
+                var userConfirmed = confirm("Are you sure you want to delete this asset?");
+                if (userConfirmed) {
+                    fetch('/PrivateAssetModule/DeleteAsset?id=' + assetId, {
+                        method: 'POST'
+                    }).then(response => {
+                        if(response.ok) {
+                            alert('Asset deleted successfully!');
+                            location.reload();  // Reload the page to reflect the deletion
+                        } else {
+                            alert('Error deleting the asset.');
+                        }
+                    });
+                }
+            });
+        });
+    });</script>

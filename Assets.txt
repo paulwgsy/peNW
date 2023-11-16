@@ -1,0 +1,2 @@
+{"AssetID":1,"Type":0,"FundName":"ARC Standard Model","Currency":"USD","Strategy":0,"AssetClass":0,"ManagerID":1,"Vintage":1990,"AssociatedFundID":null,"AssociatedFund":null,"Manager":null}
+{"AssetID":2,"Type":1,"FundName":"50SC 2005","Currency":"USD","Strategy":0,"AssetClass":0,"ManagerID":2,"Vintage":2005,"AssociatedFundID":null,"AssociatedFund":null,"Manager":null}

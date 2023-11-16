@@ -1,0 +1,445 @@
+﻿@model List<YearlyComparison>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Yearly Transactions</th>
+                <th colspan="4">Fund</th>
+                <th colspan="4">Model</th>
+            </tr>
+            <tr>
+                <th>Year</th>
+                <th>Capital Call</th>
+                <th>Distribution</th>
+                <th>Net Cash Flow</th>
+                <th>Carry Value</th>
+                <th>Capital Call</th>
+                <th>Distribution</th>
+                <th>Net Cash Flow</th>
+                <th>Carry Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comparison in Model)
+            {
+                <tr>
+                    <td>@comparison.Year</td>
+                    <td>@string.Format("{0:N2}", comparison.FundPeriodCapitalCall)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundPeriodDistribution)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundPeriodNCF)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundCarryValue)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelPeriodCapitalCall)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelPeriodDistribution)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelPeriodNCF)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelCarryValue)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th colspan="8">Yearly Valuations</th>
+            </tr>
+            <tr>
+                <th>Asset</th>
+                <th>Capital Call</th>
+                <th>Distribution</th>
+                <th>Net Cash Flow</th>
+                <th>Carry Value</th>
+                <th>DPI</th>
+                <th>RVPI</th>
+                <th>TVPI</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comparison in Model)
+            {
+                <tr>
+                    <td colspan="8">@comparison.Year</td>
+                </tr>
+                <tr>
+                    <td>Fund</td>
+                    <td>@string.Format("{0:N2}", comparison.FundTotalCapitalCall)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundTotalDistribution)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundTotalNCF)</td>
+                    <td>@string.Format("{0:N2}", comparison.FundCarryValue)</td>
+                    <td>@string.Format("{0:F2}", comparison.FundDPI)</td>
+                    <td>@string.Format("{0:F2}", comparison.FundRVPI)</td>
+                    <td>@string.Format("{0:F2}", comparison.FundTVPI)</td>
+                </tr>
+                <tr>
+                    <td>Model</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelTotalCapitalCall)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelTotalDistribution)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelTotalNCF)</td>
+                    <td>@string.Format("{0:N2}", comparison.ModelCarryValue)</td>
+                    <td>@string.Format("{0:F2}", comparison.ModelDPI)</td>
+                    <td>@string.Format("{0:F2}", comparison.ModelRVPI)</td>
+                    <td>@string.Format("{0:F2}", comparison.ModelTVPI)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div id="areaChart"></div>
+    <div id="tvpiLineChart"></div>
+    <div id="ncfChart"></div>
+
+    <!-- Styling for clarity. Adjust or expand as needed. -->
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+
+    @section Scripts {
+        <script>
+        // Assuming `Model` is the list of YearlyComparison objects passed to the view
+        var data = @Html.Raw(Json.Serialize(Model));
+        console.log(data);
+
+            function createNCFBarChart(data) {
+                // D3.js code to create the bar chart
+                var svgWidth = window.innerWidth * .8, svgHeight = 500, barPadding = 0.1;
+                var margin = { top: 20, right: 20, bottom: 30, left: 100 },
+                    width = svgWidth - margin.left - margin.right,
+                    height = svgHeight - margin.top - margin.bottom;
+
+                // Create SVG element
+                var svg = d3.select("#ncfChart")
+                    .append("svg")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // Set up the scales
+                var x0Scale = d3.scaleBand().rangeRound([0, width]).padding(barPadding);
+                var x1Scale = d3.scaleBand();
+                var yScale = d3.scaleLinear().range([height, 0]);
+
+                // Set the domains
+                x0Scale.domain(data.map(function (d) { return d.year; }));
+                x1Scale.domain(['Model', 'Portfolio']).rangeRound([0, x0Scale.bandwidth()]);
+                yScale.domain([d3.min(data, function (d) { return Math.min(d.modelPeriodNCF, d.fundPeriodNCF); }), d3.max(data, function (d) { return Math.max(d.modelPeriodNCF, d.fundPeriodNCF); })]);
+
+                // Create the axes
+                var xAxis = d3.axisBottom(x0Scale);
+                var yAxis = d3.axisLeft(yScale);
+
+                // Add the axes to the SVG element
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
+
+                svg.append("g")
+                    .call(yAxis);
+
+                // Add the bars for the model NCF
+                var modelBars = svg.selectAll(".bar.modelNCF")
+                    .data(data)
+                    .enter()
+                    .append("g")
+                    .attr("transform", function (d) { return "translate(" + x0Scale(d.year) + ",0)"; });
+
+                modelBars.append("rect")
+                    .attr("class", "bar modelNCF")
+                    .attr("x", function (d) { return x1Scale('Model'); })
+                    .attr("width", x1Scale.bandwidth())
+                    .attr("y", function (d) { return yScale(Math.max(0, d.modelPeriodNCF)); })
+                    .attr("height", function (d) { return Math.abs(yScale(d.modelPeriodNCF) - yScale(0)); })
+                    .attr("fill", "#008DA6");
+
+                // Add the bars for the portfolio NCF
+                var portfolioBars = svg.selectAll(".bar.portfolioNCF")
+                    .data(data)
+                    .enter()
+                    .append("g")
+                    .attr("transform", function (d) { return "translate(" + x0Scale(d.year) + ",0)"; });
+
+                portfolioBars.append("rect")
+                    .attr("class", "bar portfolioNCF")
+                    .attr("x", function (d) { return x1Scale('Portfolio'); })
+                    .attr("width", x1Scale.bandwidth())
+                    .attr("y", function (d) { return yScale(Math.max(0, d.fundPeriodNCF)); })
+                    .attr("height", function (d) { return Math.abs(yScale(d.fundPeriodNCF) - yScale(0)); })
+                    .attr("fill", "#172E4E");
+            }
+
+            function createTVPILineChart(data) {
+                // Set up dimensions and margins
+                var svgWidth = window.innerWidth*.8, svgHeight = 500;
+                var margin = { top: 20, right: 20, bottom: 150, left: 50 },
+                    width = svgWidth - margin.left - margin.right,
+                    height = svgHeight - margin.top - margin.bottom;
+
+                // Create SVG element for TVPI line chart
+                var svg = d3.select("#tvpiLineChart")
+                    .append("svg")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // Scales
+                var xScale = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                var yScale = d3.scaleLinear().rangeRound([height, 0]);
+
+                // Domains
+                xScale.domain(data.map(function (d) { return d.year; }));
+                yScale.domain([0, d3.max(data, function (d) { return Math.max(d.modelTVPI, d.fundTVPI); })]);
+
+                // Line generators
+                var lineModelTVPI = d3.line()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; }) // Center in the band
+                    .y(function (d) { return yScale(d.modelTVPI); });
+
+                var lineFundTVPI = d3.line()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; }) // Center in the band
+                    .y(function (d) { return yScale(d.fundTVPI); });
+
+                // Axes
+                var xAxis = d3.axisBottom(xScale).tickSize(0); // No tick marks
+                var yAxis = d3.axisLeft(yScale).tickSize(-width).ticks(5); // 5 ticks only
+
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    .style("font-size", "12px");
+
+                svg.append("g")
+                    .call(yAxis)
+                    .selectAll(".tick line")
+                    .attr("stroke", "#E0E0E0")  // Color for grid lines
+                    .attr("stroke-dasharray", "2,2");  // Dashed grid lines
+
+                // Append the paths for the lines
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#00BDA6") // Color for 'Risk Free'
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 2.5)
+                    .attr("d", lineModelTVPI);
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#172E4E") // Color for 'Benchmark'
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 2.5)
+                    .attr("d", lineFundTVPI);
+
+                svg.selectAll(".domain").remove();
+
+                // Define legend data
+                var legendData = [
+                    { color: "#00BDA6", label: "Model TVPI" },
+                    { color: "#172E4E", label: "Fund TVPI" }
+                ];
+
+                // Add a group for the legend
+                var legend = svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth/2 - 120) + "," + (height + 30) + ")");  // Adjust the y-position accordingly
+
+                // Add rectangles for color indication
+                legend.selectAll("rect")
+                    .data(legendData)
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d, i) { return i * 120; })
+                    .attr("y", 0)
+                    .attr("width", 10)
+                    .attr("height", 10)
+                    .attr("fill", function (d) { return d.color; });
+
+                // Add labels next to rectangles
+                legend.selectAll("text")
+                    .data(legendData)
+                    .enter()
+                    .append("text")
+                    .attr("x", function (d, i) { return i * 120 + 15; })
+                    .attr("y", 9)
+                    .text(function (d) { return d.label; })
+                    .attr("alignment-baseline", "middle");
+
+                // Get the last data point
+                var lastDataPoint = data[data.length - 1];
+
+                // Fetch end TVPI values
+                var endModelTVPI = lastDataPoint.modelTVPI;
+                var endFundTVPI = lastDataPoint.fundTVPI;
+
+                // Create comment text
+                var commentText = "The Model has delivered a TVPI of " + endModelTVPI.toFixed(2) + " and the Fund has delivered a TVPI of " + endFundTVPI.toFixed(2) + ".";
+                var textWidth = commentText.length * 6;  // Assuming an average of 6 pixels per character
+
+                // Add comment below the legend
+                svg.append("text")
+                    .attr("x", (svgWidth - textWidth)/2)
+                    .attr("y", height + 70)  // Adjust the y-position accordingly
+                    .html("The Model has delivered a TVPI of <tspan fill='#00BDA6'>" + endModelTVPI.toFixed(2) + "</tspan> and the Fund has delivered a TVPI of <tspan fill='#172E4E'>" + endFundTVPI.toFixed(2) + "</tspan>.")  // Use tspan for colored text
+                    .attr("font-size", "12px");
+
+
+
+            }
+
+            function createAreaChart(data) {
+                // Set up dimensions and margins
+                var svgWidth = window.innerWidth * .8, svgHeight = 500;
+                var margin = { top: 20, right: 20, bottom: 60, left: 50 },
+                    width = svgWidth - margin.left - margin.right,
+                    height = svgHeight - margin.top - margin.bottom;
+
+
+                // Create SVG element
+                var svg = d3.select("#areaChart")
+                    .append("svg")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // Scales
+                var xScale = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                var yScale = d3.scaleLinear().rangeRound([height, 0]);
+
+                // Domains
+                xScale.domain(data.map(function (d) { return d.year; }));
+
+                // Area generators
+                var areaFund = d3.area()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; })
+                    .y0(height)
+                    .y1(function (d) { return yScale(d.fundCarryValue); });
+
+                var areaDist = d3.area()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; })
+                    .y0(function (d) { return yScale(d.fundCarryValue); })
+                    .y1(function (d) { return yScale(d.fundCarryValue + + d.fundTotalDistribution); });
+
+                // Modify the yScale domain
+                yScale.domain([0, d3.max(data, function (d) {
+                    return Math.max(Math.max(d.fundCarryValue + d.fundTotalDistribution), Math.max(d.modelCarryValue + d.modelTotalDistribution));
+                })]);
+
+                // Axes
+                var xAxis = d3.axisBottom(xScale).tickSize(0); // No tick marks
+                var yAxis = d3.axisLeft(yScale).tickSize(-width).ticks(5); // 5 ticks only
+
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    .style("font-size", "12px");
+
+                svg.append("g")
+                    .call(yAxis)
+                    .selectAll(".tick line")
+                    .attr("stroke", "#E0E0E0")  // Color for grid lines
+                    .attr("stroke-dasharray", "2,2");  // Dashed grid lines
+
+                // Append paths for the stacked areas
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "#172E4E") // Example color for Fund
+                    .attr("d", areaFund);
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "#AC3964") // Example color for Model
+                    .attr("d", areaDist);
+
+                // Modify line generators for dashed lines to represent model and fund distributed values
+                var lineModelCarry = d3.line()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; })
+                    .y(function (d) { return yScale(d.modelCarryValue); })
+                    .curve(d3.curveMonotoneX);
+
+                var lineModelDistributed = d3.line()
+                    .x(function (d) { return xScale(d.year) + xScale.bandwidth() / 2; })
+                    .y(function (d) { return yScale(d.modelCarryValue + d.modelTotalDistribution); })
+                    .curve(d3.curveMonotoneX);
+
+                // Append the paths for the dashed lines
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#008DA6")
+                    .attr("stroke-dasharray", "4,4")
+                    .attr("stroke-width", 2.5)
+                    .attr("d", lineModelCarry);
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#41D09F")
+                    .attr("stroke-dasharray", "4,4")
+                    .attr("stroke-width", 2.5)
+                    .attr("d", lineModelDistributed);
+
+                svg.selectAll(".domain").remove();
+
+                // Define legend data
+                var legendData = [
+                    { color: "#008DA6", label: "Model Carry" },
+                    { color: "#41D09F", label: "Model Distributed" },
+                    { color: "#172E4E", label: "Fund Carry" },
+                    { color: "#AC3964", label: "Fund Distributed" }
+                ];
+
+                // Add a group for the legend
+                var legend = svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth / 2 - 300) + "," + (height + 30) + ")");  // Adjust the y-position accordingly
+
+                // Add rectangles for color indication
+                legend.selectAll("rect")
+                    .data(legendData)
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d, i) { return i * 150; })
+                    .attr("y", 0)
+                    .attr("width", 10)
+                    .attr("height", 10)
+                    .attr("fill", function (d) { return d.color; });
+
+                // Add labels next to rectangles
+                legend.selectAll("text")
+                    .data(legendData)
+                    .enter()
+                    .append("text")
+                    .attr("x", function (d, i) { return i * 150 + 15; })
+                    .attr("y", 9)
+                    .text(function (d) { return d.label; })
+                    .attr("alignment-baseline", "middle");
+
+            }
+
+            // Call the functions to create the charts
+            createNCFBarChart(data);
+            createTVPILineChart(data);
+            createAreaChart(data);
+        </script>
+    }
+
+
+</body>

@@ -1,0 +1,17 @@
+[
+  {
+    "Id": 1,
+    "Label": "Global Equity Fund",
+    "InstrumentId": 1
+  },
+  {
+    "Id": 2,
+    "Label": "Bond Portfolio",
+    "InstrumentId": 2
+  },
+  {
+    "Id": 3,
+    "Label": "Real Estate Investment",
+    "InstrumentId": 3
+  }
+]

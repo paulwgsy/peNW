@@ -1,0 +1,29 @@
+﻿@model List<Transaction>
+
+<h2>Transaction Summary</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>AssetID</th>
+            <th>Date</th>
+            <th>Value</th>
+            <th>Currency</th>
+            <th>Type</th>
+            <th>Calculation</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model.OrderBy(t => t.Date))
+        {
+            <tr>
+                <td>@transaction.AssetID</td>
+                <td>@transaction.Date.ToShortDateString()</td>
+                <td>@transaction.Value</td>
+                <td>@transaction.Currency</td>
+                <td>@transaction.Type</td>
+                <td>@transaction.Calculation</td>
+            </tr>
+        }
+    </tbody>
+</table>

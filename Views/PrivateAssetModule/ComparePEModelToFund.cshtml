@@ -1,0 +1,26 @@
+﻿<!-- Form to select Fund and PEModel -->
+<form asp-action="GenerateComparison" method="post">
+    <!-- Dropdown for Fund selection -->
+    <div>
+        <label for="fundId">Select a Fund:</label>
+        <select name="fundId" required>
+            @foreach (var fund in ViewBag.Funds)
+            {
+                <option value="@fund.AssetID">@fund.FundName</option>
+            }
+        </select>
+    </div>
+
+    <!-- Dropdown for PEModel selection -->
+    <div>
+        <label for="peModelId">Select a PEModel:</label>
+        <select name="peModelId" required>
+            @foreach (var PEmodel in ViewBag.PEModels)
+            {
+                <option value="@PEmodel.AssetID">@PEmodel.FundName</option>
+            }
+        </select>
+    </div>
+
+    <input type="submit" value="Generate Comparison" />
+</form>

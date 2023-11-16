@@ -1,0 +1,35 @@
+[
+  {
+    "Id": 1,
+    "Name": "Retirement Portfolio",
+    "Valuations": [
+      {
+        "Id": 101,
+        "Value": 1000000,
+        "Currency": "USD",
+        "Date": "2022-12-31",
+        "InvestmentId": 1
+      },
+      {
+        "Id": 102,
+        "Value": 1050000,
+        "Currency": "USD",
+        "Date": "2023-01-31",
+        "InvestmentId": 1
+      }
+    ]
+  },
+  {
+    "Id": 2,
+    "Name": "Education Savings",
+    "Valuations": [
+      {
+        "Id": 201,
+        "Value": 500000,
+        "Currency": "EUR",
+        "Date": "2022-12-31",
+        "InvestmentId": 2
+      }
+    ]
+  }
+]

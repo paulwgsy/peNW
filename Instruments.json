@@ -1,0 +1,14 @@
+[
+  {
+    "Id": 1,
+    "Name": "Global Equity Fund"
+  },
+  {
+    "Id": 2,
+    "Name": "Bond Portfolio"
+  },
+  {
+    "Id": 3,
+    "Name": "Real Estate Fund"
+  }
+]

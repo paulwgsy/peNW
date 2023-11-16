@@ -1,0 +1,43 @@
+﻿@model List<Asset>
+@{
+    ViewBag.Title = "Asset Summary Selector";
+}
+
+<div class="asset-summary">
+    <h1>Select Your Asset</h1>
+
+    <h2>Assets</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Asset Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asset in Model)
+            {
+                <tr>
+                    <td>@asset.FundName</td>
+                    <td><a href="@Url.Action("AssetView", "PrivateAssetModule", new { AssetID = asset.AssetID })">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<style>
+    .asset-summary {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #e1e1e1;
+        border-radius: 5px;
+    }
+
+        .asset-summary div {
+            margin-bottom: 10px;
+        }
+</style>

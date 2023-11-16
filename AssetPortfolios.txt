@@ -1,0 +1,2 @@
+{"PrivateAssetPortfolioID":1,"AssetIDs":[1,2],"Assets":null,"PortfolioName":"My Portfolio"}
+{"PrivateAssetPortfolioID":2,"AssetIDs":[2],"Assets":null,"PortfolioName":"My Portfolio II"}

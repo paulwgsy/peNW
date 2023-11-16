@@ -1,0 +1,26 @@
+﻿@model List<NoahWeb_Private_Asset_Module.Models.Portfolio>
+
+<h2>Portfolios</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Portfolio ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var portfolio in Model)
+        {
+            <tr>
+                <td>@portfolio.Id</td>
+                <td>@portfolio.Name</td>
+                <td>
+                    <!-- Replace with the correct route to your PortfolioValuation view -->
+                    <a href="@Url.Action("ValuationView", "Portfolio", new { portfolioId = portfolio.Id })">View Valuations</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,22 @@
+[
+  {
+    "Id": 1,
+    "Name": "Developed World"
+  },
+  {
+    "Id": 2,
+    "Name": "All World"
+  },
+  {
+    "Id": 3,
+    "Name": "North America"
+  },
+  {
+    "Id": 4,
+    "Name": "Europe"
+  },
+  {
+    "Id": 5,
+    "Name": "Emerging Markets"
+  }
+]

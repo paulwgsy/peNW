@@ -1,0 +1,41 @@
+﻿@model PrivateAssetPortfolio
+
+@{
+    ViewBag.Title = "Private Asset Portfolio Details";
+}
+
+<h2>@Model.PortfolioName</h2>
+
+@if (Model.Assets != null && Model.Assets.Any())
+{
+    <h3>Assets in Portfolio:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Asset ID</th>
+                <th>Fund Name</th>
+                <th>Vintage</th>
+                <th>Currency</th>
+                <!-- Other asset properties as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asset in Model.Assets)
+            {
+                <tr>
+                    <td>@asset.AssetID</td>
+                    <td>@asset.FundName</td>
+                    <td>@asset.Vintage</td>
+                    <td>@asset.Currency</td>
+                    <!-- Other asset properties as needed -->
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No assets found in this portfolio.</p>
+}
+
+<!-- Additional portfolio details as needed -->

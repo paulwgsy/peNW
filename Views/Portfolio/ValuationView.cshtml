@@ -1,0 +1,174 @@
+﻿@model PortfolioGridModel
+<!-- Include jQuery DataTables CSS and JS in your layout or directly here -->
+<head>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+
+    <!-- jQuery ContextMenu CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.contextMenu.min.css" />
+
+
+
+
+</head>
+
+<body>
+    <table id="valuationTable" class="display">
+        <thead>
+            <tr>
+                <th>Investment</th>
+                @foreach (var date in Model.ValuationsByDate.Keys.OrderBy(d => d))
+                {
+                    <th class="sum">@date.ToShortDateString()</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var investment in Model.Investments)
+            {
+                <tr>
+                    <td>@investment.Label</td>
+                    @foreach (var date in Model.ValuationsByDate.Keys.OrderBy(d => d))
+                    {
+                        var valuation = Model.ValuationsByDate[date].FirstOrDefault(v => v.InvestmentId == investment.Id);
+                        <td class="vdata" data-investment-id="@investment.Id" data-date="@date" data-value="@(valuation?.Value ?? 0)">@valuation?.Value.ToString("C")</td>
+                    }
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Total:</th>
+                @foreach (var date in Model.ValuationsByDate.Keys.OrderBy(d => d))
+                {
+                    <th class="sum">0</th>
+                }
+            </tr>
+        </tfoot>
+    </table>
+    <!-- jQuery ContextMenu -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.contextMenu.min.js"></script>
+    <!-- DataTables -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+    <script type="text/javascript">$(document).ready(function () {
+            var table = $('#valuationTable').DataTable({
+
+                "scrollX": false, // Enable horizontal scrolling
+
+                "footerCallback": function (row, data, start, end, display) {
+                    try {
+                        var api = this.api();
+
+                        var sumColumnIndexes = api.columns('.sum').indexes().toArray();
+
+                        console.log("Recalculating Columns");
+
+                        api.columns('.sum').every(function (colIdx) {
+
+                            var total = 0;
+                            var vdataCells = $('.vdata');
+
+
+
+                            // Filter cells by their column index
+                            var cellsInColIdx = vdataCells.filter(function () {
+                                return $(this).index() === colIdx;
+                            });
+                            
+                            cellsInColIdx.each(function () {
+                                var cellData = $(this).text();
+
+                                var dataValue = $(this).data('value');
+
+                                console.log("Call Value", dataValue);
+
+                                if (dataValue) {
+                                    total += parseFloat(dataValue);
+                                }
+                            });
+
+                            // Update footer
+                            $(api.column(colIdx).footer()).html(total.toFixed(2));
+                        });
+                    } catch (error) {
+                        console.error("Error occurred:", error);
+                    }
+                },
+                "drawCallback": function (settings) {
+                    console.log("Table redrawn");
+                }
+                // ...other options you may need
+            });
+
+            // Context Menu setup
+            $.contextMenu({
+                selector: '#valuationTable td',
+                callback: function (key, options) {
+                    // Get cell data
+                    var cell = table.cell(this);
+                    var data = cell.data();
+                    var columnIdx = cell.index().column;
+                    var rowIdx = cell.index().row;
+                    var investmentId = $(cell.node()).data('investment-id');
+                    var date = $(cell.node()).data('date');
+
+                    if (key === "edit") {
+                        // Edit action
+                        editCell(cell, investmentId, date, table);
+                    } else if (key === "delete") {
+                        // Delete or another action
+                        // Handle accordingly
+                    }
+                },
+                items: {
+                    "edit": { name: "Edit", icon: "edit" },
+                    "delete": { name: "Delete", icon: "delete" },
+                    // Add other items as needed
+                }
+            });
+        });
+
+        function editCell(cell, investmentId, date, table) {
+            // create an input element and set its value to the cell's value
+            var $input = $('<input>', {
+                value: cell.data(),
+                type: 'text',
+                blur: function () {
+                    // When focus is lost, set the cell's data to the input's value and save it
+                    console.log("Input value before parsing:", $input.val());
+
+                    var inputValue = $input.val().replace(/[^0-9.-]+/g, '');
+                    var numericValue = parseFloat(inputValue) || 0;
+
+                    console.log("Parsed numeric value:", numericValue);
+
+
+                    $(cell.node()).attr('data-value', numericValue); 
+
+                    cell.data(numericValue).invalidate();
+
+                    table.draw(false);
+
+                    updateValuationData(investmentId, date, $input.val());
+
+
+                },
+                keyup: function (e) {
+                    if (e.keyCode === 13) {
+                        // When enter is pressed, set the cell's data to the input's value and save it
+                        $input.blur();
+                    }
+                }
+            });
+
+            // Replace the cell's content with the input element
+            $(cell.node()).html($input);
+            $input.focus();
+        };
+
+        function updateValuationData(investmentId, date, newValue) {
+            // AJAX call to update the valuation data in the database
+            // Handle accordingly
+        }</script>
+
+</body>

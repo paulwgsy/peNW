@@ -1,0 +1,34 @@
+[
+  {
+    "CountryId": 1,
+    "RegionId": 1
+  },
+  {
+    "CountryId": 1,
+    "RegionId": 2
+  },
+  {
+    "CountryId": 1,
+    "RegionId": 3
+  },
+  {
+    "CountryId": 2,
+    "RegionId": 1
+  },
+  {
+    "CountryId": 2,
+    "RegionId": 2
+  },
+  {
+    "CountryId": 2,
+    "RegionId": 4
+  },
+  {
+    "CountryId": 3,
+    "RegionId": 4
+  },
+  {
+    "CountryId": 3,
+    "RegionId": 5
+  }
+]

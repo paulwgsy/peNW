@@ -1,0 +1,21 @@
+﻿@model PrivateAssetPortfolio
+
+@{
+    ViewBag.Title = "Create Asset Portfolio";
+}
+
+<h2>Create Asset Portfolio</h2>
+
+<form asp-action="CreatePrivateAssetPortfolio" method="post">
+    <div>
+        <label for="PortfolioName">Portfolio Name:</label>
+        <input asp-for="PortfolioName" type="text" />
+    </div>
+    <div>
+        <label for="Assets">Select Assets:</label>
+        <select asp-for="AssetIDs" asp-items="@(new SelectList(ViewBag.Assets, "AssetID", "FundName"))" multiple="multiple">
+        </select>
+    </div>
+
+    <input type="submit" value="Create Portfolio" />
+</form>

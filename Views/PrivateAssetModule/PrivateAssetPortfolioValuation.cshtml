@@ -1,0 +1,82 @@
+﻿@model List<AssetView>
+@{
+    ViewData["Title"] = "Private Asset Portfolio Valuation";
+}
+
+<div class="valuation-view">
+    <h1>Portfolio Valuation</h1>
+
+    <form action="@Url.Action("PrivateAssetPortfolioValuation", "PrivateAssetModule")" method="post">
+        <div>
+            <label for="privateAssetPortfolioId">Select Portfolio:</label>
+            <select id="privateAssetPortfolioId" name="privateAssetPortfolioId" asp-items="@ViewBag.Portfolios"></select>
+        </div>
+        <div>
+            <label for="date">Valuation Date:</label>
+            <input type="date" id="date" name="date" value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")" />
+        </div>
+        <input type="submit" value="Update" />
+    </form>
+
+    <!-- Display table only if there is data -->
+    @if (Model?.Any() == true)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Asset ID</th>
+                    <th>Specified Date</th>
+                    <th>Contribution Total</th>
+                    <th>Distribution Total</th>
+                    <th>Net Cash Flow</th>
+                    <th>Carry Value</th>
+                    <th>DPI</th>
+                    <th>RVPI</th>
+                    <th>TVPI</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.AssetID</td>
+                        <td>@item.SpecifiedDate.ToString("MMM-yyyy")</td>
+                        <td>@string.Format("{0:N2}", item.ContributionTotal)</td>
+                        <td>@string.Format("{0:N2}", item.DistributionTotal)</td>
+                        <td>@string.Format("{0:N2}", item.NetCashFlowTotal)</td>
+                        <td>@string.Format("{0:N2}", item.CarryValue)</td>
+                        <td>@string.Format("{0:F2}", item.DPI)</td>
+                        <td>@string.Format("{0:F2}", item.RVPI)</td>
+                        <td>@string.Format("{0:F2}", item.TVPI)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No data available for the selected portfolio and date.</p>
+    }
+</div>
+
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .table, .table th, .table td {
+            border: 1px solid #d1d1d1;
+            padding: 10px;
+        }
+
+            .table th {
+                background-color: #f4f4f4;
+                text-align: left;
+            }
+
+            .table tbody tr:hover {
+                background-color: #f9f9f9;
+            }
+</style>
